@@ -21,10 +21,10 @@ if "initialized" not in st.session_state:
 
 
 
-# with st.sidebar:
-#     st.image("logo.jpeg", width=100)
-#     st.markdown("### Baiskeli POS")
-#     st.markdown("---")
+with st.sidebar:
+    st.image("logo.jpeg", width=100)
+    st.markdown("### Baiskeli POS")
+    st.markdown("---")
     
 # ---------------- SESSION STATE ----------------
 if "user" not in st.session_state:
