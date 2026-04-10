@@ -4,6 +4,8 @@ from inventory import get_all_products, add_product, restock_product, update_pro
 from pos import process_sale, generate_receipt
 from analytics import get_sales_summary, get_daily_sales, get_top_products
 from repairs import create_repair, add_repair_item, get_repairs, update_repair_status,get_repair_items,get_repair_service_cost, record_repair_sale
+from receipt import generate_pdf_receipt
+
 
 st.set_page_config(page_title="Baiskeli POS", layout="wide")
 
@@ -204,6 +206,7 @@ def pos_screen():
         }
         for _, row in df.iterrows()
     }
+    
 
     # --- ADD TO CART ---
     st.subheader("🛒 Add Item")
@@ -271,13 +274,23 @@ def pos_screen():
 
             sale_id, total, items = process_sale(cart_items)
 
-            receipt = generate_receipt(sale_id, total, items)
+            receipt_file = generate_pdf_receipt(sale_id, items, total)
 
             st.success("Sale completed!")
-            st.text(receipt)
 
-            # clear cart
-            st.session_state.cart = []
+# Download button
+            with open(receipt_file, "rb") as f:
+                st.download_button(
+                    label="📄 Download Receipt",
+                    data=f,
+                    file_name=receipt_file,
+                    mime="application/pdf"
+                )
+            # st.success("Sale completed!")
+            # st.text(receipt)
+
+            # # clear cart
+            # st.session_state.cart = []
 
         except Exception as e:
             st.error(str(e))
