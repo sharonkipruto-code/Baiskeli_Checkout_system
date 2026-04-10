@@ -1,39 +1,51 @@
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image
 from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib.pagesizes import A4
 from datetime import datetime
 
-def generate_pdf_receipt(sale_id, items, total):
-    filename = f"receipt_{sale_id}.pdf"
-
-    doc = SimpleDocTemplate(filename, pagesize=A4)
+def generate_pdf_receipt(filename, cart, total, customer_name="Walk-in", currency="KES"):
+    doc = SimpleDocTemplate(filename)
     styles = getSampleStyleSheet()
+    elements = []
 
-    content = []
+    # Logo
+    try:
+        logo = Image("logo.jpeg", width=100, height=50)
+        elements.append(logo)
+    except:
+        pass
 
-    # Title
-    content.append(Paragraph("🚲 Baiskeli Centre", styles["Title"]))
-    content.append(Paragraph("Nairobi CBD", styles["Normal"]))
-    content.append(Spacer(1, 10))
+    elements.append(Spacer(1, 10))
 
-    # Receipt Info
-    content.append(Paragraph(f"Receipt No: {sale_id}", styles["Normal"]))
-    content.append(Paragraph(f"Date: {datetime.now()}", styles["Normal"]))
-    content.append(Spacer(1, 10))
+    # Shop Name
+    elements.append(Paragraph("<b>Baiskeli Centre</b>", styles["Title"]))
+    elements.append(Spacer(1, 10))
+
+    # Customer + Date
+    elements.append(Paragraph(f"<b>Customer:</b> {customer_name}", styles["Normal"]))
+    elements.append(Paragraph(f"<b>Date:</b> {datetime.now().strftime('%Y-%m-%d %H:%M')}", styles["Normal"]))
+    elements.append(Spacer(1, 10))
 
     # Items
-    for item in items:
-        line = f"{item['name']} x{item['quantity']} - KES {item['price'] * item['quantity']}"
-        content.append(Paragraph(line, styles["Normal"]))
+    elements.append(Paragraph("<b>Items</b>", styles["Heading3"]))
 
-    content.append(Spacer(1, 10))
+    for item in cart:
+        name = item["name"]
+        qty = item["quantity"]
+        price = item["price"]
+        item_total = qty * price
+
+        elements.append(
+            Paragraph(f"{name} (x{qty}) - {currency} {item_total:.2f}", styles["Normal"])
+        )
+
+    elements.append(Spacer(1, 10))
 
     # Total
-    content.append(Paragraph(f"TOTAL: KES {total}", styles["Heading2"]))
+    elements.append(Paragraph(f"<b>TOTAL: {currency} {total:.2f}</b>", styles["Normal"]))
 
-    content.append(Spacer(1, 20))
-    content.append(Paragraph("Thank you for your business!", styles["Normal"]))
+    elements.append(Spacer(1, 10))
+    elements.append(Paragraph("Thank you for your purchase!", styles["Italic"]))
 
-    doc.build(content)
+    doc.build(elements)
 
-    return filename
+    return filename  # ✅ return file name

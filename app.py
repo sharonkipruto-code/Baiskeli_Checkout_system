@@ -1,14 +1,31 @@
 import streamlit as st
+
+st.set_page_config(
+    page_title="Baiskeli POS",
+    page_icon="🚲",
+    layout="wide"
+)
+
+
 from auth import login, create_user
 from inventory import get_all_products, add_product, restock_product, update_product, delete_product
 from pos import process_sale, generate_receipt
 from analytics import get_sales_summary, get_daily_sales, get_top_products
 from repairs import create_repair, add_repair_item, get_repairs, update_repair_status,get_repair_items,get_repair_service_cost, record_repair_sale
 from receipt import generate_pdf_receipt
+from datetime import datetime
+
+if "initialized" not in st.session_state:
+    st.session_state.initialized = True
 
 
-st.set_page_config(page_title="Baiskeli POS", layout="wide")
 
+
+# with st.sidebar:
+#     st.image("logo.jpeg", width=100)
+#     st.markdown("### Baiskeli POS")
+#     st.markdown("---")
+    
 # ---------------- SESSION STATE ----------------
 if "user" not in st.session_state:
     st.session_state.user = None
@@ -274,8 +291,10 @@ def pos_screen():
 
             sale_id, total, items = process_sale(cart_items)
 
-            receipt_file = generate_pdf_receipt(sale_id, items, total)
+            filename=f"receipt_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
 
+            receipt_file = generate_pdf_receipt(filename, items, total)
+            
             st.success("Sale completed!")
 
 # Download button
@@ -283,14 +302,15 @@ def pos_screen():
                 st.download_button(
                     label="📄 Download Receipt",
                     data=f,
-                    file_name=receipt_file,
+                    #filename=f"receipt_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf",
                     mime="application/pdf"
                 )
             # st.success("Sale completed!")
             # st.text(receipt)
 
             # # clear cart
-            # st.session_state.cart = []
+            st.session_state.cart = []
+            st.rerun()
 
         except Exception as e:
             st.error(str(e))
