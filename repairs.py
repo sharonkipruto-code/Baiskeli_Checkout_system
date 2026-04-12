@@ -38,14 +38,14 @@ def add_repair_item(repair_id, product_id, quantity,price):
         VALUES (?, ?, ?, ?)
     """, (repair_id, product_id, quantity, price))
 
-    # Update stock safely using correct column
-    cursor.execute("SELECT quantity_in_stock FROM products WHERE id=?", (product_id,))
-    row = cursor.fetchone()
-    if row:
-        new_stock = max(0, row[0] - quantity)  # prevent negative stock
-        cursor.execute("UPDATE products SET quantity_in_stock=? WHERE id=?", (new_stock, product_id))
-    conn.commit()
-    conn.close()
+    # # Update stock safely using correct column
+    # cursor.execute("SELECT quantity_in_stock FROM products WHERE id=?", (product_id,))
+    # row = cursor.fetchone()
+    # if row:
+    #     new_stock = max(0, row[0] - quantity)  # prevent negative stock
+    #     cursor.execute("UPDATE products SET quantity_in_stock=? WHERE id=?", (new_stock, product_id))
+    # conn.commit()
+    # conn.close()
 
 
 # ---------------- GET ALL REPAIRS ----------------
@@ -55,10 +55,27 @@ def get_repairs():
     import pandas as pd
 
     query = """
-    SELECT id, customer_name, phone, bike_type, issue,
-           service_cost, status, created_at
-    FROM repairs
-    ORDER BY created_at DESC
+    SELECT 
+        r.id,
+        r.customer_name,
+        r.phone,
+        r.bike_type,
+        r.issue,
+        r.service_cost,
+        r.status,
+        r.created_at,
+
+        -- 👇 NEW: combine parts into one column
+        GROUP_CONCAT(
+            p.name || ' x' || ri.quantity || ' (KES ' || ri.price || ')', ', '
+        ) AS parts_used
+
+    FROM repairs r
+    LEFT JOIN repair_items ri ON r.id = ri.repair_id
+    LEFT JOIN products p ON ri.product_id = p.id
+
+    GROUP BY r.id
+    ORDER BY r.created_at DESC
     """
 
     df = pd.read_sql_query(query, conn)
@@ -165,15 +182,15 @@ def record_repair_sale(repair_id):
             continue
 
         cursor.execute("""
-            INSERT INTO sales_items (sale_id, product_id, quantity, price)
+            INSERT INTO sale_items (sale_id, product_id, quantity, price)
             VALUES (?, ?, ?, ?)
         """, (sale_id, product_id, qty, price))
     
-    if st.button("Mark as Paid"):
-        update_repair_status(repair_id, "paid")
-        record_repair_sale(repair_id)
-        st.success("Repair recorded in sales!")
-        st.rerun()
+    # if st.button("Mark as Paid"):
+    #     update_repair_status(repair_id, "paid")
+    #     record_repair_sale(repair_id)
+    #     st.success("Repair recorded in sales!")
+    #     st.rerun()
 
     conn.commit()
     conn.close()
@@ -191,3 +208,25 @@ def update_repair_status(repair_id, status):
 
     conn.commit()
     conn.close()
+
+def get_repair_details(repair_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT customer_name, phone, bike_type, issue
+        FROM repairs
+        WHERE id = ?
+    """, (repair_id,))
+
+    row = cursor.fetchone()
+    conn.close()
+
+    if row:
+        return {
+            "customer_name": row[0],
+            "phone": row[1],
+            "bike_type": row[2],
+            "issue": row[3]
+        }
+    return {}
