@@ -1,6 +1,6 @@
 import sqlite3
 
-conn = sqlite3.connect("baiskeli.db")
+conn = sqlite3.connect("Databases/baiskeli.db")
 cursor = conn.cursor()
 
 # ---------------- REPAIRS TABLE ----------------

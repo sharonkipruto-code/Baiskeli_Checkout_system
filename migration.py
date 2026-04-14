@@ -1,7 +1,7 @@
 import sqlite3
 
 def run_migrations():
-    conn = sqlite3.connect("baiskeli.db")
+    conn = sqlite3.connect("Databases/baiskeli.db")
     cursor = conn.cursor()
 
     # Example: add column safely

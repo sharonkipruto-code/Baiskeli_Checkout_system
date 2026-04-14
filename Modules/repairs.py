@@ -1,7 +1,7 @@
 import sqlite3
-from inventory import reduce_stock
+from Modules.inventory import reduce_stock
 
-DB_NAME = "baiskeli.db"
+DB_NAME = "Databases/baiskeli.db"
 
 def get_connection():
     return sqlite3.connect(DB_NAME)
@@ -34,18 +34,12 @@ def add_repair_item(repair_id, product_id, quantity,price):
     reduce_stock(product_id, quantity)
 
     cursor.execute("""
-        INSERT INTO repair_items (repair_id, product_id, quantity,price)
+        INSERT INTO repair_items (repair_id, product_id, quantity, price)
         VALUES (?, ?, ?, ?)
     """, (repair_id, product_id, quantity, price))
 
-    # # Update stock safely using correct column
-    # cursor.execute("SELECT quantity_in_stock FROM products WHERE id=?", (product_id,))
-    # row = cursor.fetchone()
-    # if row:
-    #     new_stock = max(0, row[0] - quantity)  # prevent negative stock
-    #     cursor.execute("UPDATE products SET quantity_in_stock=? WHERE id=?", (new_stock, product_id))
-    # conn.commit()
-    # conn.close()
+    conn.commit()
+    conn.close()
 
 
 # ---------------- GET ALL REPAIRS ----------------

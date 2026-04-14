@@ -1,7 +1,7 @@
 import sqlite3
 from datetime import datetime
 
-DB_NAME = "baiskeli.db"
+DB_NAME = "Databases/baiskeli.db"
 
 def get_connection():
     return sqlite3.connect(DB_NAME)

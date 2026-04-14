@@ -1,7 +1,7 @@
 import sqlite3
 import pandas as pd
 
-DB_NAME = "baiskeli.db"
+DB_NAME = "Databases/baiskeli.db"
 
 def get_connection():
     return sqlite3.connect(DB_NAME)
