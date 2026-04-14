@@ -16,7 +16,7 @@ def generate_pdf_receipt(filename, items, total, customer_name="Walk-in", paymen
 
     # ---------------- LOGO ----------------
     try:
-        logo = Image("logo.png", width=80, height=50)
+        logo = Image("Assets\logo.png", width=80, height=50)
         content.append(logo)
     except:
         pass

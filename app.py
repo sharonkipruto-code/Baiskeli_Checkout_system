@@ -805,7 +805,7 @@ if "user" not in st.session_state or st.session_state.user is None:
     col1, col2 = st.columns([1, 5])
 
     with col1:
-        st.image("logo.png", width=100)
+        st.image("Assets\logo.png", width=100)
 
     with col2:
         st.title("Baiskeli POS System")
@@ -817,7 +817,7 @@ else:
     col1, col2 = st.columns([6, 1])
 
     with col2:
-        st.image("logo.png", width=60)
+        st.image("Assets\logo.png", width=60)
 
     st.markdown("---")
     
@@ -827,13 +827,13 @@ from init_db import init_db
 if not os.path.exists("baiskeli.db"):
     init_db()
 
-from auth import login, create_user
-from inventory import get_all_products, add_product, restock_product, update_product, delete_product
-from pos import process_sale, generate_receipt
-from analytics import get_sales_summary, get_daily_sales, get_top_products
-from repairs import create_repair, add_repair_item, get_repairs, update_repair_status,get_repair_items,get_repair_service_cost, record_repair_sale
-from receipt import generate_pdf_receipt
-from parking import check_in, check_out, get_active_parking, get_parking_history
+from Modules.auth import login, create_user
+from Modules.inventory import get_all_products, add_product, restock_product, update_product, delete_product
+from Modules.pos import process_sale, generate_receipt
+from Modules.analytics import get_sales_summary, get_daily_sales, get_top_products
+from Modules.repairs import create_repair, add_repair_item, get_repairs, update_repair_status,get_repair_items,get_repair_service_cost, record_repair_sale
+from Modules.receipt import generate_pdf_receipt
+from Modules.parking import check_in, check_out, get_active_parking, get_parking_history
 from datetime import datetime
 from migration import run_migrations
 
@@ -844,7 +844,7 @@ if "initialized" not in st.session_state:
 
 
 with st.sidebar:
-    st.image("logo.png", width=120)
+    st.image("Assets\logo.png", width=120)
     st.markdown("## Baiskeli Centre")
     st.markdown("🚲 POS System")
     st.markdown("---")
