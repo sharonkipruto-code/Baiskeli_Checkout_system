@@ -5,7 +5,7 @@ def init_db():
     
     with open("schema.sql", "r") as f:
         conn.executescript(f.read())
-    
+
     conn.commit()
     conn.close()
     print("✅ Database created successfully!")

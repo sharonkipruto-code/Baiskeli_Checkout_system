@@ -1,10 +1,12 @@
 -- PRODUCTS TABLE
-CREATE TABLE products (
+CREATE TABLE IF NOT EXISTS products (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     category TEXT NOT NULL,        -- bike, accessory, service, parking
     subcategory TEXT,              -- kids, adult, repair, etc.
     size TEXT,                   -- for bikes
+    brand TEXT,                  -- for future use
+    description TEXT,            -- for future use
     cost_price REAL,
     selling_price REAL NOT NULL,
     quantity_in_stock INTEGER DEFAULT 0,
@@ -12,20 +14,19 @@ CREATE TABLE products (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-ALTER TABLE products ADD COLUMN brand TEXT;
-ALTER TABLE products ADD COLUMN size TEXT;
-ALTER TABLE products ADD COLUMN description TEXT;
 
 -- SALES TABLE
-CREATE TABLE sales (
+CREATE TABLE IF NOT EXISTS sales (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     total_amount REAL NOT NULL,
     payment_method TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    type TEXT DEFAULT 'sale',  -- sale, service, parking
+    reference_id INTEGER  -- for linking to service or parking if needed
 );
 
 -- SALE ITEMS (what was sold in each sale)
-CREATE TABLE sale_items (
+CREATE TABLE IF NOT EXISTS sale_items (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     sale_id INTEGER,
     product_id INTEGER,
@@ -36,7 +37,7 @@ CREATE TABLE sale_items (
 );
 
 -- INVENTORY LOGS (CRITICAL for tracking stock history)
-CREATE TABLE inventory_logs (
+CREATE TABLE IF NOT EXISTS inventory_logs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     product_id INTEGER,
     change INTEGER,  -- +10, -2 etc
@@ -46,21 +47,21 @@ CREATE TABLE inventory_logs (
 );
 
 -- CUSTOMERS (for future invoices + loyalty)
-CREATE TABLE customers (
+CREATE TABLE IF NOT EXISTS customers (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT,
     phone TEXT
 );
 
 -- SERVICES (repairs, maintenance)
-CREATE TABLE services (
+CREATE TABLE IF NOT EXISTS services (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     description TEXT,
     price REAL
 );
 
 -- PARKING (for commuters)
-CREATE TABLE parking (
+CREATE TABLE IF NOT EXISTS parking (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     customer_name TEXT,
     bike_description TEXT,
@@ -85,6 +86,7 @@ CREATE TABLE IF NOT EXISTS repair_items (
     repair_id INTEGER,
     product_id INTEGER,
     quantity INTEGER,
+    price REAL,
     FOREIGN KEY (repair_id) REFERENCES repairs(id),
     FOREIGN KEY (product_id) REFERENCES products(id)
 );

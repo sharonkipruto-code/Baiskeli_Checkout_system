@@ -792,6 +792,7 @@
 
 
 import streamlit as st
+import os
 
 st.set_page_config(
     page_title="Baiskeli POS",
@@ -819,7 +820,12 @@ else:
         st.image("logo.png", width=60)
 
     st.markdown("---")
+    
+from init_db import init_db
 
+# Only create DB if it doesn't exist
+if not os.path.exists("baiskeli.db"):
+    init_db()
 
 from auth import login, create_user
 from inventory import get_all_products, add_product, restock_product, update_product, delete_product
@@ -829,6 +835,9 @@ from repairs import create_repair, add_repair_item, get_repairs, update_repair_s
 from receipt import generate_pdf_receipt
 from parking import check_in, check_out, get_active_parking, get_parking_history
 from datetime import datetime
+from migration import run_migrations
+
+run_migrations()
 
 if "initialized" not in st.session_state:
     st.session_state.initialized = True
@@ -844,6 +853,16 @@ with st.sidebar:
         st.success(f"Logged in as: {st.session_state.user['role']}")
 
     st.markdown("### Navigation")
+
+
+    # if st.session_state.user and st.session_state.user["role"] == "admin":
+    #     if st.button("⚠️ Reset Database"):
+    #         os.remove("baiskeli.db")
+    #         init_db()
+    #         st.success("Database reset!")
+    #         st.rerun()
+
+
     
 # ---------------- SESSION STATE ----------------
 if "user" not in st.session_state:
