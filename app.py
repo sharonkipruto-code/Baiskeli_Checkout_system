@@ -771,7 +771,7 @@ def cashier_screen():
 
     with tabs[2]:
         menu = "Repairs"
-        st.subheader("🔧 Repairs Management")
+        # st.subheader("🔧 Repairs Management")
         repairs_screen()
 
     with tabs[3]:
