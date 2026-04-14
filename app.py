@@ -22,6 +22,7 @@ from pos import process_sale, generate_receipt
 from analytics import get_sales_summary, get_daily_sales, get_top_products
 from repairs import create_repair, add_repair_item, get_repairs, update_repair_status,get_repair_items,get_repair_service_cost, record_repair_sale
 from receipt import generate_pdf_receipt
+from parking import check_in, check_out, get_active_parking, get_parking_history
 from datetime import datetime
 
 if "initialized" not in st.session_state:
@@ -99,10 +100,10 @@ def inventory_screen():
             product["ID"],
             name,
             category,
+            subcategory,
             brand,
             size,
             description,
-            subcategory,
             cost,
             price
         )
@@ -288,7 +289,15 @@ def pos_screen():
     st.markdown("---")
     st.subheader(f"💵 Total: KES {total}")
 
+    # --- CHECKOUT OPTIONS (must be outside the button block) ---
+    st.markdown("### 🧾 Checkout Details")
+    customer_name = st.text_input("Customer Name (optional)", key="pos_customer_name")
+    payment_method = st.selectbox("Payment Method", ["Cash", "M-Pesa", "Paybill"], key="pos_payment_method")
+
     # --- CHECKOUT ---
+    if "last_receipt" not in st.session_state:
+        st.session_state.last_receipt = None
+
     if st.button("✅ Checkout"):
         try:
             cart_items = [
@@ -298,16 +307,6 @@ def pos_screen():
 
             sale_id, total, items = process_sale(cart_items)
 
-            filename=f"receipt_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
-
-            receipt_file = generate_pdf_receipt(filename, items, total)
-            
-            st.success("Sale completed!")
-
-# Download button
-            customer_name = st.text_input("Customer Name (optional)")
-            payment_method = st.selectbox("Payment Method", ["Cash", "M-Pesa", "Paybill"])
-
             pdf = generate_pdf_receipt(
                 sale_id,
                 items,
@@ -315,18 +314,30 @@ def pos_screen():
                 customer_name if customer_name else "Walk-in",
                 payment_method
             )
-            
-            st.download_button(
-                    label="📄 Download Receipt",
-                    data=pdf,
-                    file_name = f"receipt_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf",
-                    mime="application/pdf"
-            )
+
+            st.session_state.last_receipt = {
+                "pdf": pdf,
+                "sale_id": sale_id,
+                "filename": f"receipt_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+            }
             st.session_state.cart = []
-            st.rerun()
+            st.success("✅ Sale completed!")
 
         except Exception as e:
             st.error(str(e))
+
+    # --- SHOW RECEIPT DOWNLOAD (persists after rerun) ---
+    if st.session_state.last_receipt:
+        st.download_button(
+            label="📄 Download Receipt",
+            data=st.session_state.last_receipt["pdf"],
+            file_name=st.session_state.last_receipt["filename"],
+            mime="application/pdf",
+            key="download_pos_receipt"
+        )
+        if st.button("🆕 New Sale"):
+            st.session_state.last_receipt = None
+            st.rerun()
 
 def repairs_screen():
     st.subheader("🔧 Repairs Management")
@@ -452,6 +463,12 @@ def repairs_screen():
             #     st.rerun()
             st.markdown("### 💳 Checkout Repair")
 
+            repair_customer = st.text_input("Customer Name (optional)", key=f"repair_customer_{repair_id}")
+            repair_payment = st.selectbox("Payment Method", ["Cash", "M-Pesa", "Paybill"], key=f"repair_payment_{repair_id}")
+
+            if "last_repair_receipt" not in st.session_state:
+                st.session_state.last_repair_receipt = None
+
             if st.button("✅ Checkout Repair", key=f"checkout_{repair_id}"):
 
                 # 1. Record sale
@@ -476,7 +493,7 @@ def repairs_screen():
                 total_parts = sum(p["qty"] * p["price"] for p in parts)
                 total = total_parts + service_cost
 
-                # 4. Add service as item (important!)
+                # 4. Add service as item
                 items.append({
                     "name": "Service Fee",
                     "quantity": 1,
@@ -488,18 +505,89 @@ def repairs_screen():
                     repair_id,
                     items,
                     total,
-                    customer_name if customer_name else "Walk-in",
-                    payment_method
-                 )
+                    repair_customer if repair_customer else "Walk-in",
+                    repair_payment
+                )
 
-                st.success("Repair checked out successfully!")
+                st.session_state.last_repair_receipt = {
+                    "pdf": pdf,
+                    "repair_id": repair_id
+                }
+                st.success("✅ Repair checked out successfully!")
 
+            if st.session_state.get("last_repair_receipt") and \
+               st.session_state.last_repair_receipt["repair_id"] == repair_id:
                 st.download_button(
                     label="📄 Download Repair Receipt",
-                    data=pdf,
+                    data=st.session_state.last_repair_receipt["pdf"],
                     file_name=f"repair_{repair_id}.pdf",
-                    mime="application/pdf"
+                    mime="application/pdf",
+                    key=f"dl_repair_{repair_id}"
                 )
+                if st.button("🆕 New Repair", key=f"new_repair_{repair_id}"):
+                    st.session_state.last_repair_receipt = None
+                    st.rerun()
+
+
+# ---------------- PARKING ----------------
+def parking_screen():
+    st.subheader("🅿️ Bicycle Parking")
+
+    tabs = st.tabs(["Check In", "Check Out", "History"])
+
+    with tabs[0]:
+        st.markdown("### 🚲 New Check-In")
+        customer = st.text_input("Customer Name", key="park_customer")
+        bike_desc = st.text_input("Bike Description (colour, model)", key="park_bike")
+        daily_rate = st.number_input("Daily Rate (KES)", min_value=10.0, value=100.0, step=10.0)
+
+        if st.button("✅ Check In"):
+            if customer and bike_desc:
+                pid = check_in(customer, bike_desc, daily_rate)
+                st.success(f"Checked in! Parking ID: **{pid}**")
+                st.info("Give the customer their Parking ID to use at check-out.")
+            else:
+                st.error("Please fill customer name and bike description.")
+
+        st.markdown("---")
+        st.markdown("### 🟢 Currently Parked")
+        active = get_active_parking()
+        if active.empty:
+            st.info("No bikes currently parked.")
+        else:
+            st.dataframe(active, use_container_width=True)
+
+    with tabs[1]:
+        st.markdown("### 🏁 Check Out")
+        active = get_active_parking()
+
+        if active.empty:
+            st.info("No bikes currently parked.")
+        else:
+            options = {
+                f"ID {row['id']} — {row['customer_name']} ({row['bike_description']})": row["id"]
+                for _, row in active.iterrows()
+            }
+            selected = st.selectbox("Select Bike to Check Out", list(options.keys()))
+
+            if st.button("✅ Check Out & Calculate Fee"):
+                pid = options[selected]
+                try:
+                    fee, hours = check_out(pid)
+                    st.success(f"✅ Checked out after **{hours:.1f} hours**")
+                    st.metric("Fee Charged", f"KES {fee:.2f}")
+                except Exception as e:
+                    st.error(str(e))
+
+    with tabs[2]:
+        st.markdown("### 📋 Parking History")
+        history = get_parking_history()
+        if history.empty:
+            st.info("No parking history yet.")
+        else:
+            st.dataframe(history, use_container_width=True)
+            total_earned = history["fee"].sum()
+            st.metric("Total Parking Revenue", f"KES {total_earned:.2f}")
 
 
 # ---------------- ADMIN ----------------
@@ -509,7 +597,7 @@ def admin_screen():
 
     tabs = st.tabs([
         "Dashboard","Inventory", "Add Product", "Restock", 
-        "Checkout", "Sales History","Repairs","Create User"])
+        "Checkout", "Sales History","Repairs","Parking","Create User"])
 
     with tabs[0]:
         menu = "Dashboard"
@@ -628,6 +716,9 @@ def admin_screen():
         repairs_screen()
 
     with tabs[7]:
+        parking_screen()
+
+    with tabs[8]:
         menu = "Create User"
         st.subheader("👥 Create User")
         username = st.text_input("Username")
@@ -643,7 +734,7 @@ def admin_screen():
 def cashier_screen():
     st.title("🧑‍💼 Cashier Dashboard")
 
-    tabs = st.tabs(["Checkout", "Inventory", "Repairs"])
+    tabs = st.tabs(["Checkout", "Inventory", "Repairs", "Parking"])
 
     with tabs[0]:
         menu = "Checkout"
@@ -663,7 +754,10 @@ def cashier_screen():
     with tabs[2]:
         menu = "Repairs"
         st.subheader("🔧 Repairs Management")
-        repairs_screen()   
+        repairs_screen()
+
+    with tabs[3]:
+        parking_screen()
 
 # ---------------- MAIN ----------------
 if st.session_state.user is None:
