@@ -185,12 +185,7 @@ def record_repair_sale(repair_id):
             INSERT INTO sale_items (sale_id, product_id, quantity, price)
             VALUES (?, ?, ?, ?)
         """, (sale_id, product_id, qty, price))
-    
-    # if st.button("Mark as Paid"):
-    #     update_repair_status(repair_id, "paid")
-    #     record_repair_sale(repair_id)
-    #     st.success("Repair recorded in sales!")
-    #     st.rerun()
+
 
     conn.commit()
     conn.close()

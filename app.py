@@ -4,16 +4,28 @@ st.set_page_config(
     page_title="Baiskeli POS",
     layout="wide"
 )
+
 #show logo and title in header
-col1, col2 = st.columns([1, 5])
+if "user" not in st.session_state or st.session_state.user is None:
+    # LOGIN SCREEN → keep full header
+    col1, col2 = st.columns([1, 5])
 
-with col1:
-    st.image("logo.jpeg", width=100)
+    with col1:
+        st.image("logo.png", width=100)
 
-with col2:
-    st.title("Baiskeli POS System")
+    with col2:
+        st.title("Baiskeli POS System")
 
-st.markdown("---")
+    st.markdown("---")
+
+else:
+    # AFTER LOGIN → logo only on right
+    col1, col2 = st.columns([6, 1])
+
+    with col2:
+        st.image("logo.png", width=60)
+
+    st.markdown("---")
 
 
 from auth import login, create_user
@@ -29,10 +41,16 @@ if "initialized" not in st.session_state:
     st.session_state.initialized = True
 
 
-# with st.sidebar:
-#     st.image("logo.jpeg", width=100)
-#     st.markdown("### Baiskeli POS")
-#     st.markdown("---")
+with st.sidebar:
+    st.image("logo.png", width=120)
+    st.markdown("## Baiskeli Centre")
+    st.markdown("🚲 POS System")
+    st.markdown("---")
+
+    if "user" in st.session_state and st.session_state.user:
+        st.success(f"Logged in as: {st.session_state.user['role']}")
+
+    st.markdown("### Navigation")
     
 # ---------------- SESSION STATE ----------------
 if "user" not in st.session_state:
@@ -592,7 +610,7 @@ def parking_screen():
 
 # ---------------- ADMIN ----------------
 def admin_screen():
-    st.title("🧑‍💼 Admin Dashboard")
+    st.markdown("## 🧑‍💼 Admin Dashboard")
 
 
     tabs = st.tabs([
@@ -732,7 +750,7 @@ def admin_screen():
 
 # ---------------- Cashier ----------------  
 def cashier_screen():
-    st.title("🧑‍💼 Cashier Dashboard")
+    st.markdown("## 🧑‍💼 Cashier Dashboard")
 
     tabs = st.tabs(["Checkout", "Inventory", "Repairs", "Parking"])
 
@@ -772,199 +790,3 @@ else:
     else:
         cashier_screen()
 
-# # ROUTING
-#     if page == "Checkout":
-#         pos_screen()
-
-#     elif page == "Inventory":
-#         inventory_screen()
-
-#     elif page == "Dashboard" and role == "admin":
-#         admin_screen()
-
-#     elif page == "Add Product" and role == "admin":
-#         add_product_screen()
-
-#     elif page == "Restock" and role == "admin":
-#         restock_screen()
-
-#     elif page == "Create User" and role == "admin":
-#         create_user_screen()
-
-#     elif page == "Sales History" and role == "admin":
-#         sales_history_screen()
-
-   
-# import streamlit as st
-# import os
-# from datetime import datetime
-
-# from auth import login, create_user
-# from inventory import get_all_products, add_product, restock_product, update_product, delete_product
-# from pos import process_sale
-# from analytics import get_sales_summary, get_daily_sales, get_top_products
-# from repairs import (
-#     create_repair, add_repair_item, get_repairs,
-#     update_repair_status, get_repair_items,
-#     get_repair_service_cost, record_repair_sale
-# )
-# from receipt import generate_pdf_receipt
-
-# # ---------------- PAGE CONFIG ----------------
-# st.set_page_config(page_title="Baiskeli POS", layout="wide")
-
-# # ---------------- HEADER ----------------
-# BASE_DIR = os.path.dirname(__file__)
-# logo_path = os.path.join(BASE_DIR, "logo.jpeg")
-
-# col1, col2 = st.columns([1, 5])
-# with col1:
-#     if os.path.exists(logo_path):
-#         st.image(logo_path, width=100)
-# with col2:
-#     st.title("🚲 Baiskeli POS System")
-
-# st.markdown("---")
-
-# # ---------------- SESSION ----------------
-# if "user" not in st.session_state:
-#     st.session_state.user = None
-# if "cart" not in st.session_state:
-#     st.session_state.cart = []
-
-# # ---------------- LOGIN ----------------
-# def login_screen():
-#     st.title("🔐 Login")
-#     username = st.text_input("Username")
-#     password = st.text_input("Password", type="password")
-
-#     if st.button("Login"):
-#         user = login(username, password)
-#         if user:
-#             st.session_state.user = user
-#             st.rerun()
-#         else:
-#             st.error("Invalid credentials")
-
-# # ---------------- INVENTORY ----------------
-# def inventory_screen():
-#     df = get_all_products()
-
-#     st.subheader("📦 Inventory")
-
-#     search = st.text_input("Search")
-#     if search:
-#         df = df[df["Name"].str.contains(search, case=False)]
-
-#     if st.session_state.user["role"] != "admin":
-#         df = df.drop(columns=["Cost Price"], errors="ignore")
-
-#     st.dataframe(df, use_container_width=True)
-
-# # ---------------- ADD PRODUCT ----------------
-# def add_product_screen():
-#     st.subheader("➕ Add Product")
-
-#     name = st.text_input("Name")
-#     category = st.selectbox("Category", ["bike", "accessory", "part", "service"])
-#     subcategory = st.text_input("Subcategory")
-#     brand = st.text_input("Brand (optional)")
-#     size = st.text_input("Size (optional)")
-#     description = st.text_area("Description (optional)")
-#     cost = st.number_input("Cost Price")
-#     price = st.number_input("Selling Price")
-#     qty = st.number_input("Quantity", min_value=0)
-
-#     if st.button("Add Product"):
-#         if name and price:
-#             add_product(name, category, subcategory, brand or None, size or None, description or None, cost, price, qty)
-#             st.success("Product added")
-#         else:
-#             st.error("Fill required fields")
-
-# # ---------------- RESTOCK ----------------
-# def restock_screen():
-#     df = get_all_products()
-#     product_map = {f"{r['Name']} (Stock {r['Stock']})": r['ID'] for _, r in df.iterrows()}
-
-#     selected = st.selectbox("Product", list(product_map.keys()))
-#     qty = st.number_input("Quantity", min_value=1)
-
-#     if st.button("Restock"):
-#         restock_product(product_map[selected], qty)
-#         st.success("Updated")
-
-# # ---------------- POS ----------------
-# def pos_screen():
-#     st.subheader("💰 Checkout")
-
-#     df = get_all_products()
-#     products = {f"{r['Name']} (KES {r['Selling Price']})": r for _, r in df.iterrows()}
-
-#     col1, col2, col3 = st.columns([3,1,1])
-#     selected = col1.selectbox("Product", list(products.keys()))
-#     qty = col2.number_input("Qty", min_value=1, value=1)
-
-#     if col3.button("Add"):
-#         p = products[selected]
-#         st.session_state.cart.append({
-#             "product_id": p["ID"],
-#             "name": p["Name"],
-#             "price": p["Selling Price"],
-#             "quantity": qty
-#         })
-
-#     total = 0
-#     for i, item in enumerate(st.session_state.cart):
-#         total += item["price"] * item["quantity"]
-#         if st.button("❌", key=f"rm{i}"):
-#             st.session_state.cart.pop(i)
-#             st.rerun()
-
-#     st.write(f"Total: KES {total}")
-
-#     if st.button("Checkout"):
-#         sale_id, total, items = process_sale([
-#             {"product_id": i["product_id"], "quantity": i["quantity"]}
-#             for i in st.session_state.cart
-#         ])
-
-#         filename = f"receipt_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
-#         pdf = generate_pdf_receipt(filename, items, total)
-
-#         st.download_button("Download Receipt", pdf, file_name=filename)
-#         st.session_state.cart = []
-#         st.rerun()
-
-# # ---------------- REPAIRS ----------------
-# def repairs_screen():
-#     st.subheader("🔧 Repairs")
-
-#     tabs = st.tabs(["New", "Manage"])
-
-#     with tabs[0]:
-#         name = st.text_input("Customer")
-#         phone = st.text_input("Phone")
-#         bike = st.text_input("Bike")
-#         issue = st.text_area("Issue")
-#         cost = st.number_input("Service Cost")
-
-#         if st.button("Create"):
-#             rid = create_repair(name, phone, bike, issue, cost)
-#             st.session_state.repair = rid
-
-#     with tabs[1]:
-#         df = get_repairs()
-#         st.dataframe(df)
-
-# # ---------------- DASHBOARD ----------------
-# def dashboard():
-#     st.subheader("📊 Dashboard")
-
-#     period = st.selectbox("Period", ["Today","This Week","This Month","All"])
-#     s = get_sales_summary(period)
-
-#     c1,c2,c3 = st.columns(3)
-#     c1.metric("Revenue", s['total_revenue'] or 0)
-#     c2.metric("Profit", s['total_profit'] or 0)
-#     c3.metric
