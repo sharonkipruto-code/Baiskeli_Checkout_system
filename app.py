@@ -63,12 +63,12 @@ with st.sidebar:
     st.markdown("### Navigation")
 
 
-    if st.session_state.user and st.session_state.user["role"] == "admin":
-        if st.button("⚠️ Reset Database"):
-            os.remove("baiskeli.db")
-            init_db()
-            st.success("Database reset!")
-            st.rerun()
+    # if st.session_state.user and st.session_state.user["role"] == "admin":
+    #     if st.button("⚠️ Reset Database"):
+    #         os.remove("baiskeli.db")
+    #         init_db()
+    #         st.success("Database reset!")
+    #         st.rerun()
 
 
     
