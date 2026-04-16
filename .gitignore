@@ -4,6 +4,11 @@ __pycache__/
 
 # Database
 baiskeli.db
+update_db.py
+
+#Assets
+Assets/
+
 
 # Environment
 .env
