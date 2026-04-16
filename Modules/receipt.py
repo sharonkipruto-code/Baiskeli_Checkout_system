@@ -120,7 +120,7 @@ def hline(c, y, dashed=False, color=None, width=0.6):
 
 def draw_header(c, sale_id, customer, payment, rtype, y):
     # Black top band
-    c.setFillColor(BLACK)
+    c.setFillColor(WHITE)
     c.rect(L, y - 20*mm, ROLL_W, 20*mm, fill=1, stroke=0)
 
     # Logo
@@ -134,8 +134,10 @@ def draw_header(c, sale_id, customer, payment, rtype, y):
     except Exception:
         pass
 
-    txt(c, CX, y - 9*mm,  "BAISKELI CENTRE",        font=FB, size=11, color=WHITE,  align="center")
-    txt(c, CX, y - 14*mm, "Nairobi CBD  |  0712 345 678", font=FN, size=6.5, color=colors.HexColor("#AAAAAA"), align="center")
+    txt(c, CX, y - 9*mm,  "BAISKELI CENTRE",        font=FB, size=11, color=BLACK,  align="left")
+    txt(c, CX, y - 14*mm, "Kipande Road  |  Globe Roundabout", font=FN, size=6.5, color=colors.HexColor("#050404"), align="left")
+    txt(c, CX, y - 17*mm, "0746 726 202", font=FN, size=6.5, color=colors.HexColor("#050404"), align="left")
+    txt(c, CX, y - 17*mm, "www.baiskelicentre.co.ke", font=FN, size=6.5, color=colors.HexColor("#050404"), align="left")
 
     y -= 20*mm
 
@@ -262,7 +264,7 @@ def draw_footer(c, y):
             c.rect(bx, y - 7*mm, ww, 7*mm, fill=1, stroke=0)
         bx += ww + 0.4*mm
 
-    txt(c, CX, y - 9.5*mm, "* BAISKELI CENTRE *", font=FN, size=6, color=MGREY, align="center")
+    txt(c, CX, y - 9.5*mm, "* BAISKELI CENTRE *", font=FN, size=10, color=MGREY, align="center")
 
     # Bottom accent bar
     c.setFillColor(ACCENT)
