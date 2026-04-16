@@ -127,17 +127,17 @@ def draw_header(c, sale_id, customer, payment, rtype, y):
     try:
         c.drawImage(
             "Assets/logo.png",
-            CX - 8*mm, y - 14*mm,
+            CX - 40*mm, y - 14*mm,
             width=16*mm, height=12*mm,
             preserveAspectRatio=True, mask="auto"
         )
     except Exception:
         pass
 
-    txt(c, CX, y - 9*mm,  "BAISKELI CENTRE",        font=FB, size=11, color=BLACK,  align="left")
-    txt(c, CX, y - 14*mm, "Kipande Road  |  Globe Roundabout", font=FN, size=6.5, color=colors.HexColor("#050404"), align="left")
-    txt(c, CX, y - 17*mm, "0746 726 202", font=FN, size=6.5, color=colors.HexColor("#050404"), align="left")
-    txt(c, CX, y - 17*mm, "www.baiskelicentre.co.ke", font=FN, size=6.5, color=colors.HexColor("#050404"), align="left")
+    txt(c, CX-20*mm, y - 9*mm,  "BAISKELI CENTRE",        font=FB, size=11, color=BLACK,  align="left")
+    txt(c, CX-20*mm, y - 14*mm, "Kipande Road  |  Globe Roundabout", font=FN, size=6.5, color=colors.HexColor("#050404"), align="left")
+    txt(c, CX-20*mm, y - 17*mm, "0746 726 202 | www.baiskelicentre.co.ke", font=FN, size=6.5, color=colors.HexColor("#050404"), align="left")
+    # txt(c, CX, y - 17*mm, "www.baiskelicentre.co.ke", font=FN, size=6.5, color=colors.HexColor("#050404"), align="left")
 
     y -= 20*mm
 
