@@ -127,8 +127,8 @@ def draw_header(c, sale_id, customer, payment, rtype, y):
     try:
         c.drawImage(
             "Assets/logo.png",
-            CX - 40*mm, y - 14*mm,
-            width=16*mm, height=12*mm,
+            CX - 42*mm, y - 17*mm,
+            width=18*mm, height=14*mm,
             preserveAspectRatio=True, mask="auto"
         )
     except Exception:
