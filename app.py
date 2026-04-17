@@ -1104,15 +1104,15 @@ def inventory_screen():
     with tab_edit:
         if not is_admin():
             st.warning("Admin only.")
-            return
-        df = get_all_products()
-        product_map = {f"{r['Name']} (ID:{r['ID']} | Stock:{r['Stock']})": r
+        else:
+            df = get_all_products()
+            product_map = {f"{r['Name']} (ID:{r['ID']} | Stock:{r['Stock']})": r
                        for _, r in df.iterrows()}
-        selected = st.selectbox("Select Product", list(product_map.keys()))
-        if not product_map:
-            st.info("No products yet. Add one in the 'Add Product' tab.")
-            return
-        p = product_map[selected]
+            selected = st.selectbox("Select Product", list(product_map.keys()))
+            if not product_map:
+                st.info("No products yet. Add one in the 'Add Product' tab.")
+            else:
+                p = product_map[selected]
 
         with st.form("edit_product_form"):
             c1, c2 = st.columns(2)
@@ -1153,32 +1153,32 @@ def inventory_screen():
     with tab_add:
         if not is_admin():
             st.warning("Admin only.")
-            return
-        with st.form("add_product_form"):
-            c1, c2 = st.columns(2)
-            name     = c1.text_input("Product Name *")
-            category = c2.selectbox("Category *", ["bike","accessory","part","service"])
-            c3, c4   = st.columns(2)
-            subcategory = c3.text_input("Subcategory")
-            brand    = c4.text_input("Brand")
-            c5, c6   = st.columns(2)
-            size     = c5.text_input("Size")
-            desc     = c6.text_input("Description")
-            c7, c8, c9 = st.columns(3)
-            cost     = c7.number_input("Cost Price",    min_value=0.0)
-            price    = c8.number_input("Selling Price *", min_value=0.0)
-            qty      = c9.number_input("Initial Stock", min_value=0, step=1)
+        else:
+            with st.form("add_product_form"):
+                c1, c2 = st.columns(2)
+                name     = c1.text_input("Product Name *")
+                category = c2.selectbox("Category *", ["bike","accessory","part","service"])
+                c3, c4   = st.columns(2)
+                subcategory = c3.text_input("Subcategory")
+                brand    = c4.text_input("Brand")
+                c5, c6   = st.columns(2)
+                size     = c5.text_input("Size")
+                desc     = c6.text_input("Description")
+                c7, c8, c9 = st.columns(3)
+                cost     = c7.number_input("Cost Price",    min_value=0.0)
+                price    = c8.number_input("Selling Price *", min_value=0.0)
+                qty      = c9.number_input("Initial Stock", min_value=0, step=1)
 
-            if st.form_submit_button("➕ Add Product", type="primary"):
-                if name and price:
-                    add_product(name, category, subcategory or None, brand or None,
-                                size or None, desc or None, cost, price, qty)
-                    log_action(current_user(), "ADD_PRODUCT", f"name={name}")
-                    st.success(f"✅ {name} added!")
-                    st.rerun
-                else:
-                    st.error("Name and Selling Price are required.")
-
+                if st.form_submit_button("➕ Add Product", type="primary"):
+                    if name and price:
+                        add_product(name, category, subcategory or None, brand or None,
+                                    size or None, desc or None, cost, price, qty)
+                        log_action(current_user(), "ADD_PRODUCT", f"name={name}")
+                        st.success(f"✅ {name} added!")
+                        st.rerun()
+                    else:
+                        st.error("Name and Selling Price are required.")
+                        
     with tab_restock:
         df = get_all_products()
         product_map2 = {f"{r['Name']} (Stock: {r['Stock']})": r["ID"]
