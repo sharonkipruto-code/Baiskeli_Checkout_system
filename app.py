@@ -1107,48 +1107,50 @@ def inventory_screen():
         else:
             df = get_all_products()
             product_map = {f"{r['Name']} (ID:{r['ID']} | Stock:{r['Stock']})": r
-                       for _, r in df.iterrows()}
-            selected = st.selectbox("Select Product", list(product_map.keys()))
+                           for _, r in df.iterrows()}
             if not product_map:
                 st.info("No products yet. Add one in the 'Add Product' tab.")
             else:
+                selected = st.selectbox("Select Product", list(product_map.keys()))
                 p = product_map[selected]
 
-        with st.form("edit_product_form"):
-            c1, c2 = st.columns(2)
-            name   = c1.text_input("Name", value=str(p["Name"]))
-            category = c2.selectbox("Category", ["bike","accessory","part","service"],
-                                    index=["bike","accessory","part","service"].index(
-                                        p["Category"]) if p["Category"] in
-                                        ["bike","accessory","part","service"] else 0)
-            c3, c4 = st.columns(2)
-            subcategory = c3.text_input("Subcategory", value=str(p["Subcategory"] or ""))
-            brand       = c4.text_input("Brand",       value=str(p["Brand"] or ""))
-            c5, c6 = st.columns(2)
-            size    = c5.text_input("Size",   value=str(p["Size"] or ""))
-            desc    = c6.text_input("Description", value=str(p["Description"] or ""))
-            c7, c8 = st.columns(2)
-            cost  = c7.number_input("Cost Price",    value=float(p["Cost Price"] or 0))
-            price = c8.number_input("Selling Price", value=float(p["Selling Price"] or 0))
+                with st.form("edit_product_form"):
+                    c1, c2 = st.columns(2)
+                    name   = c1.text_input("Name", value=str(p["Name"]))
+                    category = c2.selectbox("Category", ["bike","accessory","part","service"],
+                                            index=["bike","accessory","part","service"].index(
+                                                p["Category"]) if p["Category"] in
+                                                ["bike","accessory","part","service"] else 0)
+                    c3, c4 = st.columns(2)
+                    subcategory = c3.text_input("Subcategory", value=str(p["Subcategory"] or ""))
+                    brand       = c4.text_input("Brand",       value=str(p["Brand"] or ""))
+                    c5, c6 = st.columns(2)
+                    size    = c5.text_input("Size",        value=str(p["Size"] or ""))
+                    desc    = c6.text_input("Description", value=str(p["Description"] or ""))
+                    c7, c8 = st.columns(2)
+                    cost  = c7.number_input("Cost Price",    value=float(p["Cost Price"] or 0))
+                    price = c8.number_input("Selling Price", value=float(p["Selling Price"] or 0))
 
-            submitted = st.form_submit_button("💾 Update Product", type="primary")
-            if submitted:
-                update_product(p["ID"], name, category, subcategory, brand, size, desc, cost, price)
-                log_action(current_user(), "UPDATE_PRODUCT", f"id={p['ID']} name={name}")
-                st.success(f"✅ {name} updated!")
-                st.rerun()
+                    submitted = st.form_submit_button("💾 Update Product", type="primary")
+                    if submitted:
+                        update_product(p["ID"], name, category, subcategory, brand, size, desc, cost, price)
+                        log_action(current_user(), "UPDATE_PRODUCT", f"id={p['ID']} name={name}")
+                        st.success(f"✅ {name} updated!")
+                        st.rerun()
 
-        st.markdown("---")
-        st.markdown("### 🗑️ Delete Product")
-        st.warning("⚠️ Deleting removes the product from inventory. Sales history is preserved.")
-        confirmed = st.checkbox(f"I confirm I want to permanently delete **{p['Name']}**",
-                                key=f"del_prod_{p['ID']}")
-        if confirmed:
-            if st.button("🗑️ DELETE PRODUCT", type="primary", key="del_prod_btn"):
-                delete_product(p["ID"])
-                log_action(current_user(), "DELETE_PRODUCT", f"id={p['ID']} name={p['Name']}")
-                st.success("Product deleted.")
-                st.rerun()
+                st.markdown("---")
+                st.markdown("### 🗑️ Delete Product")
+                st.warning("⚠️ Deleting removes the product from inventory. Sales history is preserved.")
+                confirmed = st.checkbox(f"I confirm I want to permanently delete **{p['Name']}**",
+                                        key=f"del_prod_{p['ID']}")
+                if confirmed:
+                    if st.button("🗑️ DELETE PRODUCT", type="primary", key="del_prod_btn"):
+                        delete_product(p["ID"])
+                        log_action(current_user(), "DELETE_PRODUCT", f"id={p['ID']} name={p['Name']}")
+                        st.success("Product deleted.")
+                        st.rerun()
+
+ 
 
     with tab_add:
         if not is_admin():
@@ -1178,7 +1180,7 @@ def inventory_screen():
                         st.rerun()
                     else:
                         st.error("Name and Selling Price are required.")
-                        
+
     with tab_restock:
         df = get_all_products()
         product_map2 = {f"{r['Name']} (Stock: {r['Stock']})": r["ID"]
