@@ -1,3 +1,12 @@
+-- ============================================================
+-- BAISKELI CENTRE - DATABASE SCHEMA
+-- ============================================================
+-- HOW TO ADD NEW TABLES/COLUMNS IN FUTURE:
+-- 1. Add new CREATE TABLE IF NOT EXISTS blocks below
+-- 2. Add new ALTER TABLE lines in migration.py
+-- 3. NEVER drop existing tables — always use IF NOT EXISTS
+-- ============================================================
+
 -- PRODUCTS TABLE
 CREATE TABLE IF NOT EXISTS products (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -22,7 +31,10 @@ CREATE TABLE IF NOT EXISTS sales (
     payment_method TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     type TEXT DEFAULT 'sale',  -- sale, service, parking
-    reference_id INTEGER  -- for linking to service or parking if needed
+    reference_id INTEGER,  -- for linking to service or parking if needed
+    customer_name TEXT DEFAULT 'Walk-in',
+    discount REAL DEFAULT 0,
+    amount_paid REAL
 );
 
 -- SALE ITEMS (what was sold in each sale)
@@ -50,15 +62,18 @@ CREATE TABLE IF NOT EXISTS inventory_logs (
 CREATE TABLE IF NOT EXISTS customers (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT,
-    phone TEXT
+    phone TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- SERVICES (repairs, maintenance)
 CREATE TABLE IF NOT EXISTS services (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     description TEXT,
-    price REAL
+    price REAL,
+    
 );
+
 
 -- PARKING (for commuters)
 CREATE TABLE IF NOT EXISTS parking (
@@ -92,15 +107,22 @@ CREATE TABLE IF NOT EXISTS repair_items (
 );
 
 
+-- USERS
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    role TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_login TIMESTAMP,
+    is_active INTEGER DEFAULT 1
+);
 
-
--- CREATE TABLE users (
---     id INTEGER PRIMARY KEY AUTOINCREMENT,
---     username TEXT UNIQUE NOT NULL,
---     password TEXT, NOT NULL,
---     role TEXT NOT NULL,  -- admin or cashier
---     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
--- );
-
--- INSERT OR IGNORE INTO users (username, password, role)
--- VALUES ('admin', 'admin123', 'admin');
+-- AUDIT LOGS (track all sensitive actions)
+CREATE TABLE IF NOT EXISTS audit_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT,
+    action TEXT,
+    details TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
