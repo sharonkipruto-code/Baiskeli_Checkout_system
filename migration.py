@@ -72,6 +72,20 @@ def run_migrations():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
+        # ---- parking ----
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS parking (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            customer_name TEXT,
+            bike_description TEXT,
+            start_time TIMESTAMP,
+            end_time TIMESTAMP,
+            fee REAL
+        )
+    """)
+    safe_add_column(cursor, "parking", "end_time", "TIMESTAMP")
+    safe_add_column(cursor, "parking", "fee", "REAL")
+
 
     conn.commit()
     conn.close()

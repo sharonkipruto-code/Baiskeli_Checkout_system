@@ -1175,6 +1175,7 @@ def inventory_screen():
                                 size or None, desc or None, cost, price, qty)
                     log_action(current_user(), "ADD_PRODUCT", f"name={name}")
                     st.success(f"✅ {name} added!")
+                    st.rerun
                 else:
                     st.error("Name and Selling Price are required.")
 

@@ -121,10 +121,18 @@ def check_out(parking_id):
 
 def get_active_parking():
     conn = get_connection()
-    df = pd.read_sql_query("""
-        SELECT id, customer_name, bike_description, start_time, fee AS daily_rate
-        FROM parking WHERE end_time IS NULL ORDER BY start_time ASC
-    """, conn)
+
+    try:
+        df = pd.read_sql_query("""
+            SELECT id, customer_name, bike_description, start_time, fee AS daily_rate
+            FROM parking
+            WHERE end_time IS NULL
+            ORDER BY start_time ASC
+        """, conn)
+    except Exception as e:
+        print("Parking query error:", e)
+        df = pd.DataFrame()
+
     conn.close()
     return df
 
