@@ -70,8 +70,7 @@ CREATE TABLE IF NOT EXISTS customers (
 CREATE TABLE IF NOT EXISTS services (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     description TEXT,
-    price REAL,
-    
+    price REAL
 );
 
 
