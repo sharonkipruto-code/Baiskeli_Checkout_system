@@ -224,47 +224,51 @@ def get_payment_breakdown(filter_type="All"):
     return df
 
 def get_repairs_summary(filter_type="All"):
-    conn = get_connection()
-    if filter_type == "Today":
-        wh = "WHERE DATE(created_at) = DATE('now')"
-    elif filter_type == "This Week":
-        wh = "WHERE DATE(created_at) >= DATE('now','-7 days')"
-    elif filter_type == "This Month":
-        wh = "WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m','now')"
-    else:
-        wh = ""
-    query = f"""
-    SELECT
-        COUNT(*) AS total_repairs,
-        SUM(CASE WHEN status='pending' THEN 1 ELSE 0 END) AS pending,
-        SUM(CASE WHEN status='completed' THEN 1 ELSE 0 END) AS completed,
-        SUM(CASE WHEN status='paid' THEN 1 ELSE 0 END) AS paid
-    FROM repairs {wh}
-    """
-    df = pd.read_sql_query(query, conn)
-    conn.close()
-    return df.iloc[0]
+    try:
+        conn = get_connection()
+        if filter_type == "Today":
+            wh = "WHERE DATE(created_at) = DATE('now')"
+        elif filter_type == "This Week":
+            wh = "WHERE DATE(created_at) >= DATE('now','-7 days')"
+        elif filter_type == "This Month":
+            wh = "WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m','now')"
+        else:
+            wh = ""
+        query = f"""
+        SELECT
+            COUNT(*) AS total_repairs,
+            SUM(CASE WHEN status='pending' THEN 1 ELSE 0 END) AS pending,
+            SUM(CASE WHEN status='completed' THEN 1 ELSE 0 END) AS completed,
+            SUM(CASE WHEN status='paid' THEN 1 ELSE 0 END) AS paid
+        FROM repairs {wh}
+        """
+        df = pd.read_sql_query(query, conn)
+        conn.close()
+        return df.iloc[0]
+    except Exception:
+        import pandas as pd
+        return pd.Series({"total_repairs": 0, "pending": 0, "completed": 0, "paid": 0})
 
 def get_parking_revenue(filter_type="All"):
-    conn = get_connection()
-    if filter_type == "Today":
-        wh = "WHERE DATE(end_time) = DATE('now')"
-    elif filter_type == "This Week":
-        wh = "WHERE DATE(end_time) >= DATE('now','-7 days')"
-    elif filter_type == "This Month":
-        wh = "WHERE strftime('%Y-%m', end_time) = strftime('%Y-%m','now')"
-    else:
-        wh = "WHERE end_time IS NOT NULL"
-    query = f"""
-    SELECT
-        COUNT(*) AS sessions,
-        COALESCE(SUM(fee), 0) AS revenue
-    FROM parking {wh}
-    """
-    df = pd.read_sql_query(query, conn)
-    conn.close()
-    return df.iloc[0]
-
+    try:
+        conn = get_connection()
+        if filter_type == "Today":
+            wh = "WHERE DATE(end_time) = DATE('now')"
+        elif filter_type == "This Week":
+            wh = "WHERE DATE(end_time) >= DATE('now','-7 days')"
+        elif filter_type == "This Month":
+            wh = "WHERE strftime('%Y-%m', end_time) = strftime('%Y-%m','now')"
+        else:
+            wh = "WHERE end_time IS NOT NULL"
+        query = f"SELECT COUNT(*) AS sessions, COALESCE(SUM(fee), 0) AS revenue FROM parking {wh}"
+        df = pd.read_sql_query(query, conn)
+        conn.close()
+        return df.iloc[0]
+    except Exception:
+        import pandas as pd
+        return pd.Series({"sessions": 0, "revenue": 0})
+    
+    
 def get_full_sales_history():
     conn = get_connection()
     df = pd.read_sql_query("""
