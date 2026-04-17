@@ -28,12 +28,15 @@ DB_NAME = "Databases/baiskeli.db"
 
 def safe_add_column(cursor, table, column, col_type, default=None):
     """Add a column only if it doesn't exist. Never fails."""
-    cursor.execute(f"PRAGMA table_info({table})")
-    existing = [row[1] for row in cursor.fetchall()]
-    if column not in existing:
-        default_clause = f" DEFAULT {default}" if default is not None else ""
-        cursor.execute(f"ALTER TABLE {table} ADD COLUMN {column} {col_type}{default_clause}")
-        print(f"✅ Added column: {table}.{column}")
+    try:
+        cursor.execute(f"PRAGMA table_info({table})")
+        existing = [row[1] for row in cursor.fetchall()]
+        if column not in existing:
+            default_clause = f" DEFAULT {default}" if default is not None else ""
+            cursor.execute(f"ALTER TABLE {table} ADD COLUMN {column} {col_type}{default_clause}")
+            print(f"✅ Added column: {table}.{column}")
+    except Exception as e:
+        print(f"⚠️ Skipped {table}.{column}: {e}")
 
 def run_migrations():
     conn = sqlite3.connect(DB_NAME)

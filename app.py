@@ -963,7 +963,7 @@ def dashboard_screen():
     filter_type = st.selectbox(
         "📅 Period",
         ["Today", "This Week", "This Month", "Last Month", "This Year", "All"],
-        horizontal=True, key="dash_filter"
+        key="dash_filter"
     )
 
     # ── KPI row ────────────────────────────────────────────
@@ -1110,6 +1110,9 @@ def inventory_screen():
         product_map = {f"{r['Name']} (ID:{r['ID']} | Stock:{r['Stock']})": r
                        for _, r in df.iterrows()}
         selected = st.selectbox("Select Product", list(product_map.keys()))
+        if not product_map:
+            st.info("No products yet. Add one in the 'Add Product' tab.")
+            return
         p = product_map[selected]
 
         with st.form("edit_product_form"):
@@ -1525,7 +1528,7 @@ def repairs_screen():
         rep_discount  = co3.number_input("Discount (KES)", min_value=0.0,
                                           key=f"rep_disc_{repair_id}")
         rep_amt_paid  = co4.number_input("Amount Paid",
-                                          value=float(full_total - co3),
+                                          value=float(max(0, full_total - rep_discount)),
                                           min_value=0.0,
                                           key=f"rep_paid_{repair_id}")
 
