@@ -833,9 +833,8 @@ os.makedirs("Databases", exist_ok=True)
 os.makedirs("Backups", exist_ok=True)
 os.makedirs("Assets", exist_ok=True)
 
-if not os.path.exists("Databases/baiskeli.db"):
-    from init_db import init_db
-    init_db()
+from init_db import init_db
+init_db()
 
 from migration import run_migrations
 run_migrations()

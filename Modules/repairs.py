@@ -253,29 +253,32 @@ def add_repair_item(repair_id, product_id, quantity, price):
     conn.close()
 
 def get_repairs():
-    conn = get_connection()
-    query = """
-    SELECT
-        r.id,
-        r.customer_name,
-        r.phone,
-        r.bike_type,
-        r.issue,
-        r.service_cost,
-        r.status,
-        r.created_at,
-        GROUP_CONCAT(
-            p.name || ' x' || ri.quantity || ' (KES ' || ri.price || ')', ', '
-        ) AS parts_used
-    FROM repairs r
-    LEFT JOIN repair_items ri ON r.id = ri.repair_id
-    LEFT JOIN products p ON ri.product_id = p.id
-    GROUP BY r.id
-    ORDER BY r.created_at DESC
-    """
-    df = pd.read_sql_query(query, conn)
-    conn.close()
-    return df
+    try:
+        conn = get_connection()
+        query = """
+        SELECT
+            r.id,
+            r.customer_name,
+            r.phone,
+            r.bike_type,
+            r.issue,
+            r.service_cost,
+            r.status,
+            r.created_at,
+            GROUP_CONCAT(
+                p.name || ' x' || ri.quantity || ' (KES ' || ri.price || ')', ', '
+            ) AS parts_used
+        FROM repairs r
+        LEFT JOIN repair_items ri ON r.id = ri.repair_id
+        LEFT JOIN products p ON ri.product_id = p.id
+        GROUP BY r.id
+        ORDER BY r.created_at DESC
+        """
+        df = pd.read_sql_query(query, conn)
+        conn.close()
+        return df
+    except Exception:
+        return pd.DataFrame()
 
 def get_repair_items(repair_id):
     conn = get_connection()
