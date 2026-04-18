@@ -6,6 +6,12 @@ __pycache__/
 baiskeli.db
 update_db.py
 .db
+Databases/
+Backups/
+*.db-shm
+*.db-wal
+
+secrets.toml
 
 
 #Assets
@@ -18,3 +24,4 @@ Assets/
 # OS
 .DS_Store
 Thumbs.db
+
